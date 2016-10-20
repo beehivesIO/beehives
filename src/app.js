@@ -1,10 +1,11 @@
 'use strict';
 
+import 'babel-polyfill';
 import suspend from 'suspend';
 import commander from 'commander';
 import ServicesHub from './modules/ServicesHub';
 import process from 'process';
-import packageNpm from './package.json';
+import packageNpm from '../package.json';
 import chalk from 'chalk';
 
 suspend(function*() {
@@ -26,5 +27,10 @@ suspend(function*() {
     .version(packageNpm.version)
     // .option('-d, --debug', 'Debug mode (increase verbosity)', debugMode)
     .parse(process.argv);
+
+
+  if (!process.argv.slice(2).length) {
+    commander.outputHelp();
+  }
 
 })();

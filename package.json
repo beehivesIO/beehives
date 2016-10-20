@@ -4,8 +4,10 @@
   "description": "servicesHub CLI",
   "main": "app.js",
   "scripts": {
-    "start": "./node_modules/.bin/babel-node -- app.js",
-    "build": "babel -w app.js modules/ -d build -s"
+    "clean": "rm -rf build && mkdir build",
+    "start": "node build/app.js",
+    "build-app": "babel src -d build --presets es2015 --plugins transform-object-rest-spread -s",
+    "build": "npm run clean && npm run build-app"
   },
   "repository": {
     "type": "git",
@@ -29,6 +31,9 @@
   },
   "preferGlobal": true,
   "bin": {
-    "services-hub": "app.js"
+    "services-hub": "./build/app.js"
+  },
+  "devDependencies": {
+    "babel-polyfill": "^6.16.0"
   }
 }
