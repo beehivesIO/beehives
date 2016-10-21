@@ -50,7 +50,7 @@ ServicesHubCreate.prototype.createPackageJson = suspend.callback(function*(servi
     version: '0.0.1',
     private: true,
     scripts: {
-      start: './node_modules/services-hub-boilerplate-nodejs/./start.sh'
+      start: './start.sh'
     }
   };
   yield fs.writeFile(serviceName + '/package.json', JSON.stringify(packageJson), resume());
