@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "clean": "rm -rf build && mkdir build",
-    "start": "node build/app.js",
+    "start": "npm run build && node build/app.js",
     "build-app": "babel src -d build --presets es2015 --plugins transform-object-rest-spread -s",
     "build": "npm run clean && npm run build-app",
     "prepublish": "npm run build"
