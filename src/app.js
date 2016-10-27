@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// npm build && clear &&  npm start -- create test
+
 'use strict';
 
 import 'babel-polyfill';
@@ -24,6 +26,11 @@ suspend(function*() {
     .command('create <serviceName>')
     .description('Create a new micro service')
     .action((serviceName) => servicesHub.create(serviceName, handleReturn));
+
+  commander
+    .command('deploy [directory]')
+    .description('Deploy the micro service to servicesHub')
+    .action((serviceDir) => servicesHub.deploy(serviceDir, handleReturn));
 
   commander
     .version(packageNpm.version)

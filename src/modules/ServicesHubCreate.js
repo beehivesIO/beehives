@@ -7,10 +7,10 @@ import ora from 'ora';
 import chalk from 'chalk';
 
 
-function ServicesHubCreate() {}
+function shc() {}
 
 
-ServicesHubCreate.prototype.spinning = suspend.callback(function*(args) {
+shc.prototype.spinning = suspend.callback(function*(args) {
   const spinner = ora(args.label).start();
 
   try {
@@ -24,14 +24,14 @@ ServicesHubCreate.prototype.spinning = suspend.callback(function*(args) {
 });
 
 
-ServicesHubCreate.prototype.checkServiceName = suspend.callback(function*(serviceName) {
+shc.prototype.checkServiceName = suspend.callback(function*(serviceName) {
   if (!/^[a-z0-9\-]+$/.test(serviceName)) {
     throw new Error('Name has to be /^[a-z0-9\-]+$/');
   }
 });
 
 
-ServicesHubCreate.prototype.checkFile = suspend.callback(function*(serviceName) {
+shc.prototype.checkFile = suspend.callback(function*(serviceName) {
   const lstat = yield fs.lstat(serviceName, resumeRaw());
   if (!lstat[0]) {
     throw new Error(`File or directory with name "${serviceName}" exists yet`);
@@ -39,12 +39,12 @@ ServicesHubCreate.prototype.checkFile = suspend.callback(function*(serviceName) 
 });
 
 
-ServicesHubCreate.prototype.createDirectory = suspend.callback(function*(serviceName) {
+shc.prototype.createDirectory = suspend.callback(function*(serviceName) {
   yield fs.mkdir(serviceName, resume());
 });
 
 
-ServicesHubCreate.prototype.createPackageJson = suspend.callback(function*(serviceName) {
+shc.prototype.createPackageJson = suspend.callback(function*(serviceName) {
   const packageJson = {
     name: serviceName,
     version: '0.0.1',
@@ -57,20 +57,20 @@ ServicesHubCreate.prototype.createPackageJson = suspend.callback(function*(servi
 });
 
 
-ServicesHubCreate.prototype.modulesInstall = suspend.callback(function*(serviceName) {
+shc.prototype.modulesInstall = suspend.callback(function*(serviceName) {
   process.chdir(serviceName);
   yield exec('npm i --save services-hub-boilerplate-nodejs', resume());
 });
 
 
-ServicesHubCreate.prototype.create = suspend.callback(function*(serviceName) {
+shc.prototype.create = suspend.callback(function*(serviceName) {
 
   console.log(chalk.green(`
-Creating service ${serviceName}...
+Creating micro service ${serviceName}...
   `));
 
   yield this.spinning({
-    label: 'Check service name',
+    label: 'Check micro service name',
     func: this.checkServiceName,
     args: [ serviceName ]
   }, resume());
@@ -112,4 +112,4 @@ Go to the project folder and run \`npm start\` :)
 });
 
 
-module.exports = ServicesHubCreate;
+module.exports = shc;
