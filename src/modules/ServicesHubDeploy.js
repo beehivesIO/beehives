@@ -3,92 +3,92 @@
 import suspend, { resume, resumeRaw } from 'suspend';
 import ora from 'ora';
 import chalk from 'chalk';
-import WebSocket from 'ws';
 import fs from 'fs';
-import targz from 'tar.gz';
+import targz from 'targz';
+import Nes from 'nes';
 
 function shd() {
   const packageJson = require('../../package.json');
   this._apiUrl = 'ws://localhost:8080';
   this._clientVersion = packageJson.version;
-  this._spinners = {};
 }
 
 
+shd.prototype.spinnerStart = function(label) {
+  this._spinner = ora(label).start();
+};
+
+
+shd.prototype.spinnerFail = function(error) {
+  this._spinner.fail();
+  console.error(chalk.red(error));
+  process.exit();
+};
+
+
+shd.prototype.spinnerSucceed = function() {
+  this._spinner.succeed();
+};
+
+
 shd.prototype.spinning = suspend.callback(function*(args) {
-  const spinner = ora(args.label).start();
+  this.spinnerStart(args.label);
 
   try {
     yield args.func.apply(this, [ ...args.args, resume() ]);
-    spinner.succeed();
+    this.spinnerSucceed();
   }
   catch (err) {
-    spinner.fail();
-    throw err;
+    this.spinnerFail(err);
   }
 });
-
 
 
 shd.prototype.checkConfigurationFile = suspend.callback(function*(serviceDir) {
   const lstat = yield fs.lstat(serviceDir + '/.servicesHub.json', resumeRaw());
   if (lstat[0]) {
-    throw new Error('No ".servicesHub.json" file found! Are you in a servicesHub directory?');
+    throw new Error('No ".servicesHub.json" file found! Are you in a servicesHub directory? Have you yet run "npm start"?');
   }
 });
 
 
 shd.prototype.wsConnect = suspend.callback(function*(serviceName) {
-  this._ws = new WebSocket(this._apiUrl + '/?clientVersion=' + this._clientVersion);
+  // TODO: pass clientVersion through payload or header
+  this._client = new Nes.Client(this._apiUrl + '/?clientVersion=' + this._clientVersion);
 
-  this._ws.on(
-    'error',
-    (err) => { throw new Error('Can\'t connect to servicesHub'); }
-  );
-
-  this._ws.on(
-    'message',
-    (message) => { this.wsOnMessage(message, () => {}); }
-  );
-
-  yield this._ws.on('open', resume());
+  yield this._client.connect({}, resume());
 });
 
 
-shd.prototype.wsOnMessage = suspend.callback(function*(message) {
-  message = JSON.parse(message);
-
-  if (message.action === 'spinning') {
-    if (!this._spinners[message.label]) {
-      this._spinners[message.label] = ora(message.label).start();
-    }
-    else if (message.succeed) {
-      this._spinners[message.label].succeed();
-    }
-    else if (message.error) {
-      this._spinners[message.label].fail();
-      console.error(message.error);
-      throw new Error(message.error);
-    }
-  }
-  else if (message.action === 'error') {
-    console.error(message.error);
-    throw new Error(message.error);
-  }
-  else {
-    console.error('Unknown action');
-    throw new Error('Unknown action');
-  }
+shd.prototype.wsDisconnect = suspend.callback(function*(serviceName) {
+  this._client.disconnect();
 });
 
 
 shd.prototype.archiveCreate = suspend.callback(function*(serviceName, serviceDir) {
 
-  // TODO: remove files from .gitignore
-  yield targz().compress(
-    serviceDir,
-    `/tmp/services-hub-${serviceName}.tar.gz`
-  );
+  const configuration = require(serviceDir + '/.servicesHub.json');
+  const ignoreFiles = configuration.ignoreFiles || [];
+
+  yield targz.compress({
+    src: serviceDir,
+    dest: `/tmp/services-hub-${serviceName}.tar.gz`,
+    tar: {
+      ignore: (name) => {
+        for (const ignoreFile of ignoreFiles) {
+          const reg = new RegExp(ignoreFile);
+          if (reg.test(name) === true) {
+            return true;
+          }
+        }
+        return false;
+      }
+    },
+    gz: {
+      level: 9,
+      memLevel: 9
+    }
+  }, resume());
 });
 
 
@@ -100,15 +100,40 @@ shd.prototype.archiveUpload = suspend.callback(function*(serviceName, serviceDir
     resume()
   );
 
-  yield this._ws.send(
-    JSON.stringify({
-      action: 'deploy',
-      name: serviceName,
-      archive: archive.toString('base64'),
-      sshKey: ''
-    }),
+
+  this.spinnerStart('Upload archive');
+
+
+  yield this._client.subscribe(
+    '/',
+    (message, flags) => {
+      message = JSON.parse(message);
+
+      if (message.label) {
+        this.spinnerStart(message.label);
+      }
+      else if (message.error) {
+        this.spinnerFail(message.error);
+      }
+      else {
+        this.spinnerSucceed();
+      }
+    },
     resume()
   );
+
+
+  yield this._client.request({
+    path: '/archiveUpload',
+    method: 'POST',
+    payload: {
+      name: serviceName,
+      archive: archive.toString('base64')
+    }
+  }, resume());
+
+
+  yield this._client.unsubscribe('/', null, resume());
 });
 
 
@@ -151,16 +176,25 @@ Deploying service to servicesHub...
     args: [ serviceName, serviceDir ]
   }, resume());
 
-  yield this.spinning({
-    label: 'Upload archive to servicesHub',
-    func: this.archiveUpload,
-    args: [ serviceName, serviceDir ]
-  }, resume());
+  // yield this.spinning({
+  //   label: 'Upload archive to servicesHub',
+  //   func: this.archiveUpload,
+  //   args: [ serviceName, serviceDir ]
+  // }, resume());
+
+  yield this.archiveUpload(serviceName, serviceDir, resume());
+
 
   yield this.spinning({
     label: 'Delete local archive',
     func: this.archiveDelete,
     args: [ serviceName, serviceDir ]
+  }, resume());
+
+  yield this.spinning({
+    label: 'Disconnect from servicesHub',
+    func: this.wsDisconnect,
+    args: []
   }, resume());
 
   return true;
