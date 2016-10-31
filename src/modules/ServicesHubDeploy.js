@@ -6,12 +6,44 @@ import chalk from 'chalk';
 import fs from 'fs';
 import targz from 'targz';
 import Nes from 'nes';
+import readline from 'readline';
+import isemail from 'isemail';
+import jsonFormat from 'json-format';
+import crypto from 'crypto';
+import packageJson from '../../package.json';
 
 function shd() {
-  const packageJson = require('../../package.json');
   this._apiUrl = 'ws://localhost:8080';
   this._apiClientVersion = packageJson.version;
 }
+
+
+shd.prototype.configurationLoad = suspend.callback(function*(configuration) {
+  try {
+    this._configuration = yield fs.readFile(
+      this._serviceDir + '/.servicesHub.json',
+      'utf8',
+      resume()
+    );
+    this._configuration = JSON.parse(this._configuration);
+  }
+  catch (err) {
+    throw new Error('No ".servicesHub.json" file found! Are you in a servicesHub directory? Have you run "npm start" for a first time?');
+  }
+
+});
+
+
+shd.prototype.configurationSave = suspend.callback(function*(configuration) {
+  this._configuration = Object.assign({}, configuration);
+
+  yield fs.writeFile(
+    this._serviceDir + '/.servicesHub.json',
+    jsonFormat(this._configuration),
+    'utf8',
+    resume()
+  );
+});
 
 
 shd.prototype.spinnerStart = function(label) {
@@ -44,11 +76,41 @@ shd.prototype.spinning = suspend.callback(function*(args) {
 });
 
 
-shd.prototype.checkConfigurationFile = suspend.callback(function*(serviceDir) {
-  const lstat = yield fs.lstat(serviceDir + '/.servicesHub.json', resumeRaw());
-  if (lstat[0]) {
-    throw new Error('No ".servicesHub.json" file found! Are you in a servicesHub directory? Have you yet run "npm start"?');
+shd.prototype.checkEmail = suspend.callback(function*() {
+  if (this._configuration.email) {
+    return;
   }
+
+
+  // Ask for email
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  let question = '\nYour email is required to deploy this service.\nWe will send you a link by email to validate it.\nWhat\'s your email? ';
+  let email;
+  while (!email) {
+    email = yield rl.question(question, resumeRaw());
+    email = email[0];
+
+    if (!email || !isemail.validate(email)) {
+      email = null;
+      question = '\nYour email seems incorrect. What is your email? ';
+    }
+  }
+
+  rl.close();
+
+  // Create token
+  let token = yield crypto.randomBytes(128, resume());
+  token = token.toString('hex').substr(0, 128);
+
+  // Save email and token
+  const configuration = Object.assign({}, this._configuration, { email, token });
+  yield this.configurationSave(configuration, resume());
+
+  console.log('');
 });
 
 
@@ -67,13 +129,11 @@ shd.prototype.wsDisconnect = suspend.callback(function*() {
 });
 
 
-shd.prototype.archiveCreate = suspend.callback(function*(serviceName, serviceDir) {
-
-  const configuration = require(serviceDir + '/.servicesHub.json');
-  const ignoreFiles = configuration.ignoreFiles || [];
+shd.prototype.packageCreate = suspend.callback(function*(serviceName) {
+  const ignoreFiles = this._configuration.ignoreFiles || [];
 
   yield targz.compress({
-    src: serviceDir,
+    src: this._serviceDir,
     dest: `/tmp/services-hub-${serviceName}.tar.gz`,
     tar: {
       ignore: (name) => {
@@ -94,21 +154,20 @@ shd.prototype.archiveCreate = suspend.callback(function*(serviceName, serviceDir
 });
 
 
+shd.prototype.packageUpload = suspend.callback(function*(serviceName, email, token) {
 
-shd.prototype.archiveUpload = suspend.callback(function*(serviceName, serviceDir) {
-
-  const archive = yield fs.readFile(
+  const packageDatas = yield fs.readFile(
     `/tmp/services-hub-${serviceName}.tar.gz`,
     resume()
   );
 
 
-  this.spinnerStart('Upload archive');
+  this.spinnerStart('Upload package');
 
 
   yield this._apiClient.subscribe(
-    '/',
-    (message, flags) => {
+    '/spinner',
+    (message) => {
       message = JSON.parse(message);
 
       if (message.label) {
@@ -124,23 +183,23 @@ shd.prototype.archiveUpload = suspend.callback(function*(serviceName, serviceDir
     resume()
   );
 
-
   yield this._apiClient.request({
-    path: '/archiveUpload',
+    path: '/packageUpload',
     method: 'POST',
     payload: {
       name: serviceName,
-      archive: archive.toString('base64')
+      packageDatas: packageDatas.toString('base64'),
+      email,
+      token
     }
   }, resume());
 
-
-  yield this._apiClient.unsubscribe('/', null, resume());
+  yield this._apiClient.unsubscribe('/spinner', null, resume());
 });
 
 
 
-shd.prototype.archiveDelete = suspend.callback(function*(serviceName, serviceDir) {
+shd.prototype.packageDelete = suspend.callback(function*(serviceName) {
   yield fs.unlink(
     `/tmp/services-hub-${serviceName}.tar.gz`,
     resume()
@@ -149,22 +208,19 @@ shd.prototype.archiveDelete = suspend.callback(function*(serviceName, serviceDir
 
 
 shd.prototype.deploy = suspend.callback(function*(serviceDir) {
-
   serviceDir = serviceDir || process.env.PWD;
+  this._serviceDir = serviceDir;
 
   console.log(chalk.green(`
 Deploying service to servicesHub...
   `));
 
+  yield this.configurationLoad(resume());
+  yield this.checkEmail(resume());
 
-  yield this.spinning({
-    label: 'Check configuration file',
-    func: this.checkConfigurationFile,
-    args: [ serviceDir ]
-  }, resume());
+  const { email, token } = this._configuration;
+  const serviceName = this._configuration.name;
 
-  const configuration = require(serviceDir + '/.servicesHub.json');
-  const serviceName = configuration.name;
 
   yield this.spinning({
     label: 'Connect to servicesHub',
@@ -173,24 +229,19 @@ Deploying service to servicesHub...
   }, resume());
 
   yield this.spinning({
-    label: 'Archive micro service',
-    func: this.archiveCreate,
-    args: [ serviceName, serviceDir ]
+    label: 'Package micro service',
+    func: this.packageCreate,
+    args: [ serviceName ]
   }, resume());
 
-  // yield this.spinning({
-  //   label: 'Upload archive to servicesHub',
-  //   func: this.archiveUpload,
-  //   args: [ serviceName, serviceDir ]
-  // }, resume());
 
-  yield this.archiveUpload(serviceName, serviceDir, resume());
+  yield this.packageUpload(serviceName, email, token, resume());
 
 
   yield this.spinning({
-    label: 'Delete local archive',
-    func: this.archiveDelete,
-    args: [ serviceName, serviceDir ]
+    label: 'Delete local package',
+    func: this.packageDelete,
+    args: [ serviceName ]
   }, resume());
 
   yield this.spinning({

@@ -24,6 +24,8 @@
     "chalk": "^1.1.3",
     "commander": "^2.9.0",
     "fs-extra": "^0.30.0",
+    "isemail": "^2.2.1",
+    "json-format": "^0.1.2",
     "nes": "^6.3.1",
     "ora": "^0.3.0",
     "suspend": "^0.7.0",
