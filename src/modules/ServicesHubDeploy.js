@@ -10,7 +10,7 @@ import Nes from 'nes';
 function shd() {
   const packageJson = require('../../package.json');
   this._apiUrl = 'ws://localhost:8080';
-  this._clientVersion = packageJson.version;
+  this._apiClientVersion = packageJson.version;
 }
 
 
@@ -52,16 +52,18 @@ shd.prototype.checkConfigurationFile = suspend.callback(function*(serviceDir) {
 });
 
 
-shd.prototype.wsConnect = suspend.callback(function*(serviceName) {
+shd.prototype.wsConnect = suspend.callback(function*() {
   // TODO: pass clientVersion through payload or header
-  this._client = new Nes.Client(this._apiUrl + '/?clientVersion=' + this._clientVersion);
+  this._apiClient = new Nes.Client(this._apiUrl + '/?clientVersion=' + this._apiClientVersion);
 
-  yield this._client.connect({}, resume());
+  this._apiClient.onError = () => { console.log('error'); process.exit(); };
+
+  yield this._apiClient.connect({}, resume());
 });
 
 
-shd.prototype.wsDisconnect = suspend.callback(function*(serviceName) {
-  this._client.disconnect();
+shd.prototype.wsDisconnect = suspend.callback(function*() {
+  this._apiClient.disconnect();
 });
 
 
@@ -104,7 +106,7 @@ shd.prototype.archiveUpload = suspend.callback(function*(serviceName, serviceDir
   this.spinnerStart('Upload archive');
 
 
-  yield this._client.subscribe(
+  yield this._apiClient.subscribe(
     '/',
     (message, flags) => {
       message = JSON.parse(message);
@@ -123,7 +125,7 @@ shd.prototype.archiveUpload = suspend.callback(function*(serviceName, serviceDir
   );
 
 
-  yield this._client.request({
+  yield this._apiClient.request({
     path: '/archiveUpload',
     method: 'POST',
     payload: {
@@ -133,7 +135,7 @@ shd.prototype.archiveUpload = suspend.callback(function*(serviceName, serviceDir
   }, resume());
 
 
-  yield this._client.unsubscribe('/', null, resume());
+  yield this._apiClient.unsubscribe('/', null, resume());
 });
 
 
@@ -167,7 +169,7 @@ Deploying service to servicesHub...
   yield this.spinning({
     label: 'Connect to servicesHub',
     func: this.wsConnect,
-    args: [ serviceName ]
+    args: []
   }, resume());
 
   yield this.spinning({
