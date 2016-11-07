@@ -1,6 +1,6 @@
-### Install services-hub-cli
+### Install services-hub
 
-`sudo npm install -g services-hub-cli`
+`sudo npm install -g services-hub`
 
 
 ### Get started
