@@ -11,6 +11,7 @@ import ServicesHub from './modules/ServicesHub';
 import process from 'process';
 import packageNpm from '../package.json';
 import chalk from 'chalk';
+import updateNotifier from 'update-notifier';
 
 suspend(function*() {
   const servicesHub = new ServicesHub();
@@ -20,7 +21,19 @@ suspend(function*() {
   };
 
 
-  // TODO: compare local cli version to npm version available
+  // Check if an update is available
+  const pkg = require('../package.json');
+  const notifier = new updateNotifier({
+    pkg,
+    updateCheckInterval: 1000 * 60 * 60 // Every hour
+  });
+
+  notifier.notify();
+
+  if (notifier.update) {
+    process.exit();
+  }
+
 
   commander
     .command('create <serviceName>')
