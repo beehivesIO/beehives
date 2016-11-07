@@ -5,7 +5,8 @@
 
 ### Get started
 
-```services-hub create awesomeService
+```
+services-hub create awesomeService
 cd awesomeService
 npm start
 ```
@@ -13,4 +14,4 @@ npm start
 
 ### Deploy
 
-```services-hub deploy```
+`services-hub deploy`
