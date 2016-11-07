@@ -8,7 +8,8 @@
     "start": "npm run build && node build/app.js",
     "build-app": "node_modules/.bin/babel src -d build --presets es2015 --plugins transform-object-rest-spread -s",
     "build": "npm run clean && npm run build-app",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "deploy": "./deploy.sh"
   },
   "repository": {
     "type": "git",
