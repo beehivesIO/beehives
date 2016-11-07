@@ -1,11 +1,16 @@
-## Install services-hub-cli
+### Install services-hub-cli
 
 `sudo npm install -g services-hub-cli`
 
 
-## Get started
+### Get started
 
-```services-hub-cli create awesomeService
+```services-hub create awesomeService
 cd awesomeService
-services-hub-cli start
+npm start
 ```
+
+
+### Deploy
+
+```services-hub deploy```

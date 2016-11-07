@@ -13,7 +13,8 @@ import crypto from 'crypto';
 import packageJson from '../../package.json';
 
 function shd() {
-  this._apiUrl = 'ws://localhost:8080';
+  // this._apiUrl = 'ws://localhost:10000';
+  this._apiUrl = 'ws://sh:10000';
   this._apiClientVersion = packageJson.version;
 }
 
