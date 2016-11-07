@@ -1,6 +1,6 @@
 ### Install services-hub
 
-`sudo npm install -g services-hub`
+`npm install -g services-hub`
 
 
 ### Get started
