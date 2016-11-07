@@ -104,9 +104,23 @@ Creating micro service ${serviceName}...
   }, resume());
 
   console.log(chalk.green(`
-Your micro service ${serviceName} has been successfully created!
-Go to the project folder and run \`npm start\` :)
-  `));
+Your micro service has been successfully created. Awesome!
+
+Now you can:
+
+1. go to your micro service folder:
+  # cd ${serviceName}
+
+2. start your micro service:
+  # npm start
+
+3. edit routes in directory src/routes/
+
+4. deploy it to the world:
+  # services-hub deploy
+
+Have fun :)
+`));
 
   return true;
 });
