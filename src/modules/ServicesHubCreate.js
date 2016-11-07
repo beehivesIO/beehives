@@ -114,7 +114,7 @@ Now you can:
 2. start your micro service:
   # npm start
 
-3. edit routes in directory src/routes/
+3. edit routes in directory "routes/"
 
 4. deploy it to the world:
   # services-hub deploy
