@@ -1,6 +1,6 @@
 {
   "name": "services-hub",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "servicesHub CLI",
   "main": "app.js",
   "scripts": {
