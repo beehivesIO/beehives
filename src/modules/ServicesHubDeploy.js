@@ -14,7 +14,7 @@ import packageJson from '../../package.json';
 
 function shd() {
   // this._apiUrl = 'ws://localhost:10000';
-  this._apiUrl = 'ws://sh:10000';
+  this._apiUrl = 'ws://sh.bacto.net:10000';
   this._apiClientVersion = packageJson.version;
 }
 
