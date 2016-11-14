@@ -14,6 +14,8 @@ import chalk from 'chalk';
 import updateNotifier from 'update-notifier';
 
 suspend(function*() {
+  process.env.NODE_ENV = process.env.NODE_ENV === 'production' ? 'production' : 'development';
+
   const servicesHub = new ServicesHub();
 
   const handleReturn = (err) => {

@@ -33,7 +33,9 @@
     "ora": "^0.3.0",
     "suspend": "^0.7.0",
     "targz": "^1.0.1",
-    "update-notifier": "^1.0.2",
+    "update-notifier": "^1.0.2"
+  },
+  "devDependencies": {
     "babel-cli": "^6.16.0",
     "babel-plugin-transform-object-rest-spread": "^6.16.0",
     "babel-preset-es2015": "^6.16.0"
