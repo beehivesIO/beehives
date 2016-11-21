@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Bacto/beehives.git"
+    "url": "git+https://github.com/beehivesIO/beehives.git"
   },
   "author": "Adrien <adrien@bacto.net>",
   "license": "",
   "bugs": {
-    "url": "https://github.com/Bacto/beehives/issues"
+    "url": "https://github.com/beehivesIO/beehives/issues"
   },
-  "homepage": "https://github.com/Bacto/beehives#readme",
+  "homepage": "https://github.com/beehivesIO/beehives#readme",
   "dependencies": {
     "babel-polyfill": "^6.16.0",
     "chalk": "^1.1.3",
