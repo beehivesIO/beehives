@@ -1,7 +1,7 @@
 {
-  "name": "services-hub",
+  "name": "beehives",
   "version": "0.0.5",
-  "description": "servicesHub CLI",
+  "description": "beehives CLI",
   "main": "app.js",
   "scripts": {
     "clean": "rm -rf build && mkdir build",
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Bacto/services-hub.git"
+    "url": "git+https://github.com/Bacto/beehives.git"
   },
   "author": "Adrien <adrien@bacto.net>",
   "license": "",
   "bugs": {
-    "url": "https://github.com/Bacto/services-hub/issues"
+    "url": "https://github.com/Bacto/beehives/issues"
   },
-  "homepage": "https://github.com/Bacto/services-hub#readme",
+  "homepage": "https://github.com/Bacto/beehives#readme",
   "dependencies": {
     "babel-polyfill": "^6.16.0",
     "chalk": "^1.1.3",
@@ -42,6 +42,6 @@
   },
   "preferGlobal": true,
   "bin": {
-    "services-hub": "./build/app.js"
+    "beehives": "./build/app.js"
   }
 }

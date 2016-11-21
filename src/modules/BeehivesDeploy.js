@@ -15,7 +15,7 @@ import packageJson from '../../package.json';
 function shd() {
   this._apiUrl = 'ws://localhost:10000';
   if (process.env.NODE_ENV === 'production') {
-    this._apiUrl = 'wss://sh.bacto.net';
+    this._apiUrl = 'wss://beehives.io';
   }
   this._apiClientVersion = packageJson.version;
 }
@@ -24,14 +24,14 @@ function shd() {
 shd.prototype.configurationLoad = suspend.callback(function*(configuration) {
   try {
     this._configuration = yield fs.readFile(
-      this._serviceDir + '/.servicesHub.json',
+      this._serviceDir + '/.beehives.json',
       'utf8',
       resume()
     );
     this._configuration = JSON.parse(this._configuration);
   }
   catch (err) {
-    throw new Error('No ".servicesHub.json" file found! Are you in a servicesHub directory? Have you run "npm start" for a first time?');
+    throw new Error('No ".beehives.json" file found! Are you in a beehives directory? Have you run "npm start" for a first time?');
   }
 
 });
@@ -41,7 +41,7 @@ shd.prototype.configurationSave = suspend.callback(function*(configuration) {
   this._configuration = Object.assign({}, configuration);
 
   yield fs.writeFile(
-    this._serviceDir + '/.servicesHub.json',
+    this._serviceDir + '/.beehives.json',
     jsonFormat(this._configuration),
     'utf8',
     resume()
@@ -215,7 +215,7 @@ shd.prototype.deploy = suspend.callback(function*(serviceDir) {
   this._serviceDir = serviceDir;
 
   console.log(chalk.green(`
-Deploying service to servicesHub...
+Deploying service to beehives...
   `));
 
   yield this.configurationLoad(resume());
@@ -226,7 +226,7 @@ Deploying service to servicesHub...
 
 
   yield this.spinning({
-    label: 'Connect to servicesHub',
+    label: 'Connect to beehives',
     func: this.wsConnect,
     args: []
   }, resume());
@@ -248,7 +248,7 @@ Deploying service to servicesHub...
   }, resume());
 
   yield this.spinning({
-    label: 'Disconnect from servicesHub',
+    label: 'Disconnect from beehives',
     func: this.wsDisconnect,
     args: []
   }, resume());

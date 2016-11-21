@@ -7,7 +7,7 @@
 import 'babel-polyfill';
 import suspend from 'suspend';
 import commander from 'commander';
-import ServicesHub from './modules/ServicesHub';
+import Beehives from './modules/Beehives';
 import process from 'process';
 import packageNpm from '../package.json';
 import chalk from 'chalk';
@@ -16,7 +16,7 @@ import updateNotifier from 'update-notifier';
 suspend(function*() {
   process.env.NODE_ENV = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
-  const servicesHub = new ServicesHub();
+  const beehives = new Beehives();
 
   const handleReturn = (err) => {
     if (err) { console.error(chalk.red.bold(err.toString())); }
@@ -40,12 +40,12 @@ suspend(function*() {
   commander
     .command('create <serviceName>')
     .description('Create a new micro service')
-    .action((serviceName) => servicesHub.create(serviceName, handleReturn));
+    .action((serviceName) => beehives.create(serviceName, handleReturn));
 
   commander
     .command('deploy [directory]')
-    .description('Deploy the micro service to servicesHub')
-    .action((serviceDir) => servicesHub.deploy(serviceDir, handleReturn));
+    .description('Deploy the micro service to beehives')
+    .action((serviceDir) => beehives.deploy(serviceDir, handleReturn));
 
   commander
     .version(packageNpm.version)
