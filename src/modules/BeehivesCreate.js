@@ -59,7 +59,7 @@ shc.prototype.createPackageJson = suspend.callback(function*(serviceName) {
 
 shc.prototype.modulesInstall = suspend.callback(function*(serviceName) {
   process.chdir(serviceName);
-  yield exec('npm i --save services-hub-boilerplate-nodejs', resume());
+  yield exec('npm i --save beehives-boilerplate-nodejs', resume());
 });
 
 
@@ -117,7 +117,7 @@ Now you can:
 3. edit routes in directory "routes/"
 
 4. deploy it to the world:
-  # services-hub deploy
+  # beehives deploy
 
 Have fun :)
 `));

@@ -137,7 +137,7 @@ shd.prototype.packageCreate = suspend.callback(function*(serviceName) {
 
   yield targz.compress({
     src: this._serviceDir,
-    dest: `/tmp/services-hub-${serviceName}.tar.gz`,
+    dest: `/tmp/beehives-${serviceName}.tar.gz`,
     tar: {
       ignore: (name) => {
         for (const ignoreFile of ignoreFiles) {
@@ -160,7 +160,7 @@ shd.prototype.packageCreate = suspend.callback(function*(serviceName) {
 shd.prototype.packageUpload = suspend.callback(function*(serviceName, email, token) {
 
   const packageDatas = yield fs.readFile(
-    `/tmp/services-hub-${serviceName}.tar.gz`,
+      `/tmp/beehives-${serviceName}.tar.gz`,
     resume()
   );
 
@@ -204,7 +204,7 @@ shd.prototype.packageUpload = suspend.callback(function*(serviceName, email, tok
 
 shd.prototype.packageDelete = suspend.callback(function*(serviceName) {
   yield fs.unlink(
-    `/tmp/services-hub-${serviceName}.tar.gz`,
+    `/tmp/beehives-${serviceName}.tar.gz`,
     resume()
   );
 });
