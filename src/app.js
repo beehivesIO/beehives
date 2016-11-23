@@ -27,7 +27,7 @@ suspend(function*() {
   const pkg = require('../package.json');
   const notifier = new updateNotifier({
     pkg,
-    updateCheckInterval: 1000 * 60 * 60 // Every hour
+    updateCheckInterval: 1000 * 60 * 10
   });
 
   notifier.notify();
