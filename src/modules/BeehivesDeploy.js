@@ -255,7 +255,7 @@ Deploying microservice to beehives...
 
   console.log(chalk.green(`
 Congrats, your microservice is now deployed on beehives!
-You can reach it at http://${serviceName}.bhms.io
+You can reach it at https://${serviceName}.bhms.io
   `));
 
   return true;
