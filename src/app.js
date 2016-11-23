@@ -48,12 +48,16 @@ suspend(function*() {
     .action((serviceDir) => beehives.deploy(serviceDir, handleReturn));
 
   commander
+    .on('*', () => {
+      commander.outputHelp();
+    });
+
+  commander
     .version(packageNpm.version)
     // .option('-d, --debug', 'Debug mode (increase verbosity)', debugMode)
     .parse(process.argv);
 
-
-  if (!process.argv.slice(2).length) {
+  if (!commander.args.length) {
     commander.outputHelp();
   }
 
