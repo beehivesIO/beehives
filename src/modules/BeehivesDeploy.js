@@ -15,7 +15,7 @@ import packageJson from '../../package.json';
 function shd() {
   this._apiUrl = 'ws://localhost:10000';
   if (process.env.NODE_ENV === 'production') {
-    this._apiUrl = 'wss://beehives.io';
+    this._apiUrl = 'wss://api.beehives.io';
   }
   this._apiClientVersion = packageJson.version;
 }
