@@ -13,7 +13,7 @@ import crypto from 'crypto';
 import packageJson from '../../package.json';
 
 function shd() {
-  this._apiUrl = 'ws://localhost:10000';
+  this._apiUrl = 'wss://api.localhost.beehives.io:10003';
   if (process.env.NODE_ENV === 'production') {
     this._apiUrl = 'wss://api.beehives.io';
   }

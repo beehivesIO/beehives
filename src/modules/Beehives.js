@@ -14,9 +14,9 @@ Beehives.prototype.create = suspend.callback(function*(serviceName) {
 
 
 
-Beehives.prototype.deploy = suspend.callback(function*(serviceName) {
+Beehives.prototype.deploy = suspend.callback(function*(serviceDir) {
   const beehivesDeploy = new BeehivesDeploy();
-  return yield beehivesDeploy.deploy(resume());
+  return yield beehivesDeploy.deploy(serviceDir, resume());
 });
 
 
