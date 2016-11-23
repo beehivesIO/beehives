@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
-// npm build && clear &&  npm start -- create test
+// sudo npm link
+//
+// npm build && clear && NODE_ENV=development npm start -- create test
 
 'use strict';
 
@@ -14,7 +16,7 @@ import chalk from 'chalk';
 import updateNotifier from 'update-notifier';
 
 suspend(function*() {
-  process.env.NODE_ENV = process.env.NODE_ENV === 'production' ? 'production' : 'development';
+  process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
   const beehives = new Beehives();
 

@@ -42,7 +42,7 @@
   },
   "preferGlobal": true,
   "bin": {
-    "beehives": "NODE_ENV=production ./build/app.js"
+    "beehives": "./build/app.js"
   },
   "engines": {
     "node": ">=4"
