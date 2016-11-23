@@ -215,7 +215,7 @@ shd.prototype.deploy = suspend.callback(function*(serviceDir) {
   this._serviceDir = serviceDir;
 
   console.log(chalk.green(`
-Deploying service to beehives...
+Deploying microservice to beehives...
   `));
 
   yield this.configurationLoad(resume());
@@ -232,7 +232,7 @@ Deploying service to beehives...
   }, resume());
 
   yield this.spinning({
-    label: 'Package micro service',
+    label: 'Package microservice',
     func: this.packageCreate,
     args: [ serviceName ]
   }, resume());
@@ -252,6 +252,11 @@ Deploying service to beehives...
     func: this.wsDisconnect,
     args: []
   }, resume());
+
+  console.log(chalk.green(`
+Congrats, your microservice is now deployed on beehives!
+You can reach it at http://${serviceName}.bhms.io
+  `));
 
   return true;
 });
