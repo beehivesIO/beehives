@@ -125,7 +125,11 @@ shd.prototype.wsConnect = suspend.callback(function*() {
     options
   );
 
-  this._apiClient.onError = () => { console.log('error'); process.exit(); };
+  this._apiClient.onDisconnect = (willReconnect, log) => {
+    if (log.code !== 1000) {
+      this.spinnerFail('You\'ve been disconnected from the server');
+    }
+  };
 
   yield this._apiClient.connect({}, resume());
 });
