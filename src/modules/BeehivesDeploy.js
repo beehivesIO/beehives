@@ -11,6 +11,7 @@ import isemail from 'isemail';
 import jsonFormat from 'json-format';
 import crypto from 'crypto';
 import packageJson from '../../package.json';
+import ignore from 'ignore';
 
 function shd() {
   this._apiUrl = 'wss://api.localhost.beehives.io:10003';
@@ -141,20 +142,19 @@ shd.prototype.wsDisconnect = suspend.callback(function*() {
 
 
 shd.prototype.packageCreate = suspend.callback(function*(serviceName) {
-  const ignoreFiles = this._configuration.ignoreFiles || [];
+  const gitignore = yield fs.readFile(
+    this._serviceDir + '/.gitignore',
+    'utf8',
+    resume()
+  );
+  const ig = ignore().add(gitignore);
 
   yield targz.compress({
     src: this._serviceDir,
     dest: `/tmp/beehives-${serviceName}.tar.gz`,
     tar: {
       ignore: (name) => {
-        for (const ignoreFile of ignoreFiles) {
-          const reg = new RegExp(ignoreFile);
-          if (reg.test(name) === true) {
-            return true;
-          }
-        }
-        return false;
+        return ig.ignores(name);
       }
     },
     gz: {
