@@ -118,8 +118,12 @@ shd.prototype.checkEmail = suspend.callback(function*() {
 
 
 shd.prototype.wsConnect = suspend.callback(function*() {
+  const options = process.env.NODE_ENV === 'production' ? {} : { ws: { rejectUnauthorized: false } };
   // TODO: pass clientVersion through payload or header
-  this._apiClient = new Nes.Client(this._apiUrl + '/?clientVersion=' + this._apiClientVersion);
+  this._apiClient = new Nes.Client(
+    this._apiUrl + '/?clientVersion=' + this._apiClientVersion,
+    options
+  );
 
   this._apiClient.onError = () => { console.log('error'); process.exit(); };
 
