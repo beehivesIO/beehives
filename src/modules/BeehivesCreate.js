@@ -59,7 +59,12 @@ shc.prototype.createPackageJson = suspend.callback(function*(serviceName) {
 
 shc.prototype.modulesInstall = suspend.callback(function*(serviceName) {
   process.chdir(serviceName);
-  yield exec('npm i --save beehives-boilerplate-nodejs', resume());
+  try {
+    yield exec('yarn add beehives-boilerplate-nodejs', resume());
+  }
+  catch (err) {
+    yield exec('npm i --save beehives-boilerplate-nodejs', resume());
+  }
 });
 
 
