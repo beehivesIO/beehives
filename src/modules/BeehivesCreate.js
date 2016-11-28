@@ -50,7 +50,7 @@ shc.prototype.createPackageJson = suspend.callback(function*(serviceName) {
     version: '0.0.1',
     private: true,
     scripts: {
-      start: './start.sh'
+      start: './node_modules/.bin/beehives-server-nodejs'
     }
   };
   yield fs.writeFile(serviceName + '/package.json', JSON.stringify(packageJson), resume());
